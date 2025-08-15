@@ -19,9 +19,9 @@ export const connectDatabase = async (): Promise<void> => {
     console.log('💡 Make sure MongoDB is running locally or use MongoDB Atlas')
     console.log('🔧 To start local MongoDB: mongod --dbpath ./data/db')
 
-    // Don't exit in development, continue with mock data
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('⚠️  Continuing without database connection (development mode)')
+    // Don't exit in development or if no MongoDB URI, continue with mock data
+    if (process.env.NODE_ENV !== 'production' || !process.env.MONGODB_URI) {
+      console.log('⚠️  Continuing without database connection (using mock data)')
       return
     }
 
