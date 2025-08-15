@@ -1,5 +1,8 @@
 import { Router } from 'express'
 import { Request, Response } from 'express'
+import { Farm } from '../models/Farm'
+import { Activity } from '../models/Activity'
+import { Crop } from '../models/Crop'
 
 const router = Router()
 
@@ -41,11 +44,20 @@ const farms = [
 ]
 
 // GET /api/farms
-router.get('/', (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    data: farms
-  })
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const farms = await Farm.find().sort({ createdAt: -1 })
+    res.json({
+      success: true,
+      data: farms
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching farms',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    })
+  }
 })
 
 // GET /api/farms/:id
