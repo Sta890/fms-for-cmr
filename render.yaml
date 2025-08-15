@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: farm-app-backend
+    env: node
+    region: oregon # or your preferred region
+    plan: free # or starter/standard for production
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false # Set this in Render dashboard
+      - key: JWT_SECRET
+        sync: false # Set this in Render dashboard
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        sync: false # Set this to your frontend URL
+    
+  # Optional: If you want to deploy frontend on Render too
+  # - type: static
+  #   name: farm-app-frontend
+  #   env: static
+  #   buildCommand: cd frontend && npm install && npm run build
+  #   publishPath: frontend/dist
+  #   pullRequestPreviewsEnabled: true
+  #   headers:
+  #     - path: /*
+  #       name: X-Frame-Options
+  #       value: DENY
+  #     - path: /*
+  #       name: X-Content-Type-Options
+  #       value: nosniff

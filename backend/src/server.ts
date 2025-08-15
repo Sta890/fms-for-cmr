@@ -27,21 +27,39 @@ const PORT = process.env.PORT || 3001
 // Middleware
 app.use(helmet())
 // CORS Configuration
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [
-      process.env.FRONTEND_URL, // Your frontend URL from environment variable
-      'http://localhost:5173',  // Keep for local development
-      'http://localhost:3000'   // Alternative local port
-    ].filter(Boolean) // Remove undefined values
-  : true // Allow all origins in development
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true)
 
-app.use(cors({
-  origin: allowedOrigins,
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      'https://your-frontend.vercel.app', // Fallback frontend URL
+      'http://localhost:5173',  // Local development
+      'http://localhost:3000',  // Alternative local port
+      'http://127.0.0.1:5173',  // Alternative localhost
+      'http://127.0.0.1:3000'   // Alternative localhost
+    ].filter(Boolean) as string[]
+
+    // In development, allow all origins
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true)
+    }
+
+    // In production, check against allowed origins
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'), false)
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   optionsSuccessStatus: 200 // For legacy browser support
-}))
+}
+
+app.use(cors(corsOptions))
 app.use(morgan('combined'))
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
